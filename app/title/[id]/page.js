@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { getMangaById, getMangaChapters } from "@/lib/mangadex";
+import { getMangaById, getMangaChapters, getAlternateMangaChapters } from "@/lib/mangadex";
 import { notFound } from "next/navigation";
+import ChapterList from "@/app/components/ChapterList";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -17,7 +18,20 @@ export default async function TitlePage({ params }) {
   const manga = await getMangaById(id);
   if (!manga) notFound();
 
-  const { chapters } = await getMangaChapters(id, 96, 0);
+  // 1. Try primary MangaDex entry first
+  let { chapters } = await getMangaChapters(id);
+  let source = "mangadex";
+  let alternateTitle = null;
+
+  // 2. If primary entry has fewer than 15 chapters (common for DMCA'd major series), check alternate releases (Official Colored, Digital Edition, etc.)
+  if (chapters.length < 15) {
+    const alt = await getAlternateMangaChapters(manga.title, manga.englishTitle, id, chapters.length);
+    if (alt.chapters && alt.chapters.length > chapters.length) {
+      chapters = alt.chapters;
+      source = "alternate";
+      alternateTitle = alt.alternateTitle;
+    }
+  }
 
   const statusColor = {
     ongoing: "text-green-400",
@@ -85,51 +99,48 @@ export default async function TitlePage({ params }) {
           </div>
         </div>
 
-        {/* Chapter List */}
+        {/* Chapter List Section */}
         <div>
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            Chapters
-            <span className="text-sm font-normal text-zinc-500 bg-card px-2 py-0.5 rounded-md">{chapters.length}</span>
-          </h2>
+          {chapters.length === 0 ? (
+            <div>
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-3">
+                Chapters
+                <span className="text-sm font-normal text-zinc-500 bg-card px-2 py-0.5 rounded-md">0</span>
+              </h2>
+              <div className="rounded-xl border border-border bg-card p-8 text-center flex flex-col items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 text-2xl">
+                  📖
+                </div>
+                <h3 className="text-lg font-bold text-zinc-200 mb-1">No English Chapters Available</h3>
+                <p className="text-sm text-zinc-400 max-w-md mb-6 leading-relaxed">
+                  English fan translations for this title are currently unavailable on MangaDex (often due to official license restrictions). You can explore official reading platforms and database entries below:
+                </p>
 
-          <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
-            {chapters.length === 0 && (
-              <div className="p-6 text-center text-zinc-500">No English chapters available yet.</div>
-            )}
-            {chapters.map(ch => {
-              const isExternal = ch.isExternal && ch.externalUrl;
-              return (
-                <Link
-                  key={ch.id}
-                  href={isExternal ? ch.externalUrl : `/read/${ch.id}`}
-                  target={isExternal ? "_blank" : undefined}
-                  rel={isExternal ? "noopener noreferrer" : undefined}
-                  className="flex items-center justify-between px-5 py-3.5 bg-card hover:bg-zinc-800 transition-colors group"
-                >
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="font-semibold text-zinc-200 group-hover:text-primary transition-colors">
-                    Chapter {ch.chapter}
-                    {ch.title && <span className="text-zinc-500 font-normal ml-2 text-sm">— {ch.title}</span>}
-                  </span>
-                  {ch.isExternal && (
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 font-medium">
-                      External
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-6 text-sm text-zinc-500 shrink-0">
-                  <span className="hidden sm:flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    {ch.group}
-                  </span>
-                  <span className="w-20 text-right text-xs">
-                    {new Date(ch.publishedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-          </div>
+                {manga.officialLinks && manga.officialLinks.length > 0 ? (
+                  <div className="flex flex-wrap items-center justify-center gap-2.5 max-w-lg">
+                    {manga.officialLinks.map((link, idx) => (
+                      <a
+                        key={idx}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 transition-all flex items-center gap-1.5 shadow-sm"
+                      >
+                        {link.name}
+                        <svg className="w-3 h-3 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-xs text-zinc-500">No external links found for this title.</div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <ChapterList chapters={chapters} source={source} alternateTitle={alternateTitle} officialLinks={manga.officialLinks} />
+          )}
         </div>
       </main>
     </div>
