@@ -4,7 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import Pagination from "@/app/components/Pagination";
 
-export default function ChapterList({ chapters = [], source = "mangadex", alternateTitle = null, officialLinks = [] }) {
+export default function ChapterList({ chapters = [], source = "mangadex", alternateTitle = null, officialLinks = [], mangaTitle = "" }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,21 +100,33 @@ export default function ChapterList({ chapters = [], source = "mangadex", altern
               <strong>Notice:</strong> Early chapters (Ch. 1 to {Math.floor(minChapter) - 1}) are unavailable on MangaDex for this release due to publisher licensing restrictions. Available chapters start at <strong>Ch. {minChapter}</strong>.
             </span>
           </div>
-          {officialLinks && officialLinks.length > 0 && (
-            <div className="flex items-center gap-2 shrink-0">
-              {officialLinks.slice(0, 2).map((link, i) => (
-                <a
-                  key={i}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 font-semibold transition-colors flex items-center gap-1"
-                >
-                  {link.name} ↗
-                </a>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {mangaTitle && (
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(mangaTitle + " read online free")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2.5 py-1 rounded bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30 font-semibold transition-colors flex items-center gap-1"
+              >
+                Read Online Free ↗
+              </a>
+            )}
+            {officialLinks && officialLinks.length > 0 && (
+              <>
+                {officialLinks.slice(0, 2).map((link, i) => (
+                  <a
+                    key={i}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 font-semibold transition-colors flex items-center gap-1"
+                  >
+                    {link.name} ↗
+                  </a>
+                ))}
+              </>
+            )}
+          </div>
         </div>
       )}
 

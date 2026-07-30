@@ -113,8 +113,20 @@ export default async function TitlePage({ params }) {
                 </div>
                 <h3 className="text-lg font-bold text-zinc-200 mb-1">No English Chapters Available</h3>
                 <p className="text-sm text-zinc-400 max-w-md mb-6 leading-relaxed">
-                  English fan translations for this title are currently unavailable on MangaDex (often due to official license restrictions). You can explore official reading platforms and database entries below:
+                  English fan translations for this title are currently unavailable on MangaDex (often due to official license restrictions). You can search for alternative sites to read it for free, or check official listings below:
                 </p>
+
+                <a
+                  href={`https://www.google.com/search?q=${encodeURIComponent(manga.title + " read online free")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center gap-1.5 shadow-md mb-6 border border-blue-500"
+                >
+                  <span>Search on Google to Read Online Free</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
 
                 {manga.officialLinks && manga.officialLinks.length > 0 ? (
                   <div className="flex flex-wrap items-center justify-center gap-2.5 max-w-lg">
@@ -127,7 +139,7 @@ export default async function TitlePage({ params }) {
                         className="text-xs font-semibold px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 transition-all flex items-center gap-1.5 shadow-sm"
                       >
                         {link.name}
-                        <svg className="w-3 h-3 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </a>
@@ -139,7 +151,7 @@ export default async function TitlePage({ params }) {
               </div>
             </div>
           ) : (
-            <ChapterList chapters={chapters} source={source} alternateTitle={alternateTitle} officialLinks={manga.officialLinks} />
+            <ChapterList chapters={chapters} source={source} alternateTitle={alternateTitle} officialLinks={manga.officialLinks} mangaTitle={manga.title} />
           )}
         </div>
       </main>
