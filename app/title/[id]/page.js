@@ -111,42 +111,57 @@ export default async function TitlePage({ params }) {
                 <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4 text-2xl">
                   📖
                 </div>
-                <h3 className="text-lg font-bold text-zinc-200 mb-1">No English Chapters Available</h3>
+                <h3 className="text-lg font-bold text-zinc-200 mb-1">No English Chapters on MangaDex</h3>
                 <p className="text-sm text-zinc-400 max-w-md mb-6 leading-relaxed">
-                  English fan translations for this title are currently unavailable on MangaDex (often due to official license restrictions). You can search for alternative sites to read it for free, or check official listings below:
+                  English chapters for this title were removed from MangaDex due to publisher licensing restrictions. Read it for free on these sites:
                 </p>
 
-                <a
-                  href={`https://www.google.com/search?q=${encodeURIComponent(manga.title + " read online free")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center gap-1.5 shadow-md mb-6 border border-blue-500"
-                >
-                  <span>Search on Google to Read Online Free</span>
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
+                {/* Free Reading Site Grid */}
+                <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+                  {[
+                    { name: "MangaDex", icon: "📚", url: `https://mangadex.org/titles?q=${encodeURIComponent(manga.title)}`, color: "bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border-orange-500/30" },
+                    { name: "Bato.to", icon: "🔖", url: `https://bato.to/search?word=${encodeURIComponent(manga.title)}`, color: "bg-green-500/15 hover:bg-green-500/25 text-green-300 border-green-500/30" },
+                    { name: "MangaSee", icon: "👁️", url: `https://mangasee123.com/search/?q=${encodeURIComponent(manga.title)}`, color: "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30" },
+                    { name: "Flame Scans", icon: "🔥", url: `https://flamecomics.xyz/?s=${encodeURIComponent(manga.title)}`, color: "bg-red-500/15 hover:bg-red-500/25 text-red-300 border-red-500/30" },
+                    { name: "Asura Scans", icon: "⚡", url: `https://asuracomic.net/series?query=${encodeURIComponent(manga.title)}`, color: "bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border-purple-500/30" },
+                    { name: "MangaKakalot", icon: "🌸", url: `https://ww5.mangakakalot.tv/search/${encodeURIComponent(manga.title.toLowerCase().replace(/[^a-z0-9]+/g, "_"))}`, color: "bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 border-pink-500/30" },
+                    { name: "Webtoon", icon: "🎨", url: `https://www.webtoons.com/en/search?keyword=${encodeURIComponent(manga.title)}`, color: "bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border-sky-500/30" },
+                  ].map((site) => (
+                    <a
+                      key={site.name}
+                      href={site.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-semibold transition-colors ${site.color}`}
+                    >
+                      <span>{site.icon}</span>
+                      <span>{site.name}</span>
+                      <span className="text-[10px] opacity-60">↗</span>
+                    </a>
+                  ))}
+                </div>
 
-                {manga.officialLinks && manga.officialLinks.length > 0 ? (
-                  <div className="flex flex-wrap items-center justify-center gap-2.5 max-w-lg">
-                    {manga.officialLinks.map((link, idx) => (
-                      <a
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-semibold px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 transition-all flex items-center gap-1.5 shadow-sm"
-                      >
-                        {link.name}
-                        <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    ))}
+                {/* Official publisher links */}
+                {manga.officialLinks && manga.officialLinks.length > 0 && (
+                  <div className="w-full border-t border-border/50 pt-4 mt-2">
+                    <p className="text-xs text-zinc-500 mb-3">Official publisher links:</p>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {manga.officialLinks.map((link, idx) => (
+                        <a
+                          key={idx}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-semibold px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 transition-all flex items-center gap-1.5 shadow-sm"
+                        >
+                          {link.name}
+                          <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-xs text-zinc-500">No external links found for this title.</div>
                 )}
               </div>
             </div>

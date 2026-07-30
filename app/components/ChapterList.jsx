@@ -47,15 +47,49 @@ export default function ChapterList({ chapters = [], source = "mangadex", altern
   const totalItems = filteredChapters.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-  // Minimum chapter number check (detect missing early chapters due to DMCA)
-  const minChapter = useMemo(() => {
+  // Detect missing chapters: either missing early ones (starts > ch.5) or a gap in the sequence
+  const missingInfo = useMemo(() => {
     if (chapters.length === 0) return null;
+
     const nums = chapters
       .map(c => parseFloat(c.chapter))
-      .filter(n => !isNaN(n) && n > 0);
+      .filter(n => !isNaN(n) && n > 0)
+      .sort((a, b) => a - b);
+
     if (nums.length === 0) return null;
-    return Math.min(...nums);
+
+    const minCh = nums[0];
+    const maxCh = nums[nums.length - 1];
+
+    // 1. Missing early chapters (doesn't start at ch.1)
+    if (minCh > 5) {
+      return { type: "early", from: 1, to: Math.floor(minCh) - 1, resumeAt: minCh };
+    }
+
+    // 2. Detect the largest gap in the middle of the sequence
+    let biggestGapStart = null;
+    let biggestGapEnd = null;
+    let biggestGapSize = 0;
+
+    for (let i = 0; i < nums.length - 1; i++) {
+      const gap = nums[i + 1] - nums[i];
+      // A gap > 5 chapters (ignoring decimal differences like 10.1 -> 11)
+      if (gap > 5 && gap > biggestGapSize) {
+        biggestGapSize = gap;
+        biggestGapStart = Math.floor(nums[i]) + 1;
+        biggestGapEnd = Math.ceil(nums[i + 1]) - 1;
+      }
+    }
+
+    if (biggestGapStart !== null && biggestGapSize > 5) {
+      return { type: "gap", from: biggestGapStart, to: biggestGapEnd, resumeAt: null };
+    }
+
+    return null;
   }, [chapters]);
+
+  // Keep minChapter for backward compat (used as trigger condition)
+  const minChapter = missingInfo?.type === "early" ? missingInfo.resumeAt : null;
 
   // Ensure current page stays valid when filter changes
   const activePage = Math.min(currentPage, totalPages);
@@ -91,42 +125,92 @@ export default function ChapterList({ chapters = [], source = "mangadex", altern
 
   return (
     <div ref={containerRef} className="space-y-4">
-      {/* Missing Early Chapters Warning Banner */}
-      {minChapter && minChapter > 5 && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5 text-amber-300">
-            <span className="text-lg shrink-0">⚠️</span>
+      {/* Missing / Gap Chapters - Expanded Reading Links Card */}
+      {missingInfo && (
+        <div className="bg-zinc-900/80 border border-amber-500/25 rounded-xl overflow-hidden">
+          {/* Banner header */}
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3 flex items-center gap-2.5 text-xs text-amber-300">
+            <span className="text-base shrink-0">⚠️</span>
             <span>
-              <strong>Notice:</strong> Early chapters (Ch. 1 to {Math.floor(minChapter) - 1}) are unavailable on MangaDex for this release due to publisher licensing restrictions. Available chapters start at <strong>Ch. {minChapter}</strong>.
+              <strong>Notice:</strong>{" "}
+              {missingInfo.type === "early" ? (
+                <>Chapters {missingInfo.from}–{missingInfo.to} are unavailable on MangaDex due to publisher licensing restrictions. Available here from <strong>Ch. {missingInfo.resumeAt}</strong>.</>
+              ) : (
+                <>Chapters {missingInfo.from}–{missingInfo.to} are missing from this release (likely removed due to licensing). The chapter list has a gap here.</>
+              )}
+              {mangaTitle && <span className="text-amber-400/70 ml-1">— You can read the missing chapters for free on these sites:</span>}
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {mangaTitle && (
-              <a
-                href={`https://www.google.com/search?q=${encodeURIComponent(mangaTitle + " read online free")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-2.5 py-1 rounded bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30 font-semibold transition-colors flex items-center gap-1"
-              >
-                Read Online Free ↗
-              </a>
-            )}
-            {officialLinks && officialLinks.length > 0 && (
-              <>
-                {officialLinks.slice(0, 2).map((link, i) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 font-semibold transition-colors flex items-center gap-1"
-                  >
-                    {link.name} ↗
-                  </a>
-                ))}
-              </>
-            )}
-          </div>
+
+          {/* Reading site links */}
+          {mangaTitle && (
+            <div className="px-4 py-3 flex flex-wrap items-center gap-2">
+              {[
+                {
+                  name: "MangaDex",
+                  icon: "📚",
+                  url: `https://mangadex.org/titles?q=${encodeURIComponent(mangaTitle)}`,
+                  color: "bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border-orange-500/30"
+                },
+                {
+                  name: "Bato.to",
+                  icon: "🔖",
+                  url: `https://bato.to/search?word=${encodeURIComponent(mangaTitle)}`,
+                  color: "bg-green-500/15 hover:bg-green-500/25 text-green-300 border-green-500/30"
+                },
+                {
+                  name: "MangaSee",
+                  icon: "👁️",
+                  url: `https://mangasee123.com/search/?q=${encodeURIComponent(mangaTitle)}`,
+                  color: "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30"
+                },
+                {
+                  name: "Flame Scans",
+                  icon: "🔥",
+                  url: `https://flamecomics.xyz/?s=${encodeURIComponent(mangaTitle)}`,
+                  color: "bg-red-500/15 hover:bg-red-500/25 text-red-300 border-red-500/30"
+                },
+                {
+                  name: "Asura Scans",
+                  icon: "⚡",
+                  url: `https://asuracomic.net/series?query=${encodeURIComponent(mangaTitle)}`,
+                  color: "bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border-purple-500/30"
+                },
+                {
+                  name: "MangaKakalot",
+                  icon: "🌸",
+                  url: `https://ww5.mangakakalot.tv/search/${encodeURIComponent(mangaTitle.toLowerCase().replace(/[^a-z0-9]+/g, "_"))}`,
+                  color: "bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 border-pink-500/30"
+                },
+              ].map((site) => (
+                <a
+                  key={site.name}
+                  href={site.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${site.color}`}
+                >
+                  <span>{site.icon}</span>
+                  <span>{site.name}</span>
+                  <span className="text-[10px] opacity-60">↗</span>
+                </a>
+              ))}
+              {/* Official links */}
+              {officialLinks && officialLinks.slice(0, 2).map((link, i) => (
+                <a
+                  key={`official-${i}`}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30"
+                >
+                  <span>🏆</span>
+                  <span>{link.name}</span>
+                  <span className="text-[10px] opacity-60">↗</span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
