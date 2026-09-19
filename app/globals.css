@@ -1,12 +1,52 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f172a;
+  --background: #0d0f12;
   --foreground: #f8fafc;
-  --primary: #f43f5e;
-  --primary-hover: #e11d48;
-  --card: #1e293b;
-  --border: #334155;
+  --primary: #06b6d4;
+  --primary-hover: #0891b2;
+  --card: #16191e;
+  --border: #262a33;
+}
+
+/* Theme 1: Comix Slate (Default) */
+[data-theme="comix"] {
+  --background: #0d0f12;
+  --foreground: #f8fafc;
+  --primary: #06b6d4;
+  --primary-hover: #0891b2;
+  --card: #16191e;
+  --border: #262a33;
+}
+
+/* Theme 2: OLED Pitch Black */
+[data-theme="oled"] {
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary: #a855f7;
+  --primary-hover: #9333ea;
+  --card: #0c0c0e;
+  --border: #22222a;
+}
+
+/* Theme 3: Cyberpunk Dusk */
+[data-theme="cyberpunk"] {
+  --background: #0a0914;
+  --foreground: #f5f3ff;
+  --primary: #ec4899;
+  --primary-hover: #db2777;
+  --card: #131126;
+  --border: #2b274e;
+}
+
+/* Theme 4: Nord Arctic */
+[data-theme="nord"] {
+  --background: #1a202c;
+  --foreground: #f7fafc;
+  --primary: #38bdf8;
+  --primary-hover: #0284c7;
+  --card: #2d3748;
+  --border: #4a5568;
 }
 
 @theme inline {
@@ -24,6 +64,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Title Translation Styles */

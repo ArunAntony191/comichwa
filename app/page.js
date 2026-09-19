@@ -52,9 +52,26 @@ export default async function Home() {
       <div className="relative bg-gradient-to-b from-primary/10 via-background to-background pt-20 pb-10 px-4 text-center border-b border-border">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
         <h1 className="text-4xl md:text-5xl font-extrabold mb-3">
-          Read <span className="text-primary">Manga</span> & <span className="text-primary">Manhwa</span> Free
+          Read <span className="text-primary">Manga</span>, <span className="text-primary">Manhwa</span> & <span className="text-primary">Comics</span> Free
         </h1>
-        <p className="text-zinc-400 text-lg mb-6">Thousands of titles updated daily. No signup required.</p>
+        <p className="text-zinc-400 text-lg mb-6">Thousands of Japanese, Korean, Chinese & Western titles updated daily.</p>
+        
+        {/* Category Pills */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+          <Link href="/browse?langs=ja" className="px-4 py-1.5 rounded-full bg-card border border-border hover:border-primary text-xs font-semibold transition-all">
+            🇯🇵 Manga
+          </Link>
+          <Link href="/browse?langs=ko" className="px-4 py-1.5 rounded-full bg-card border border-border hover:border-primary text-xs font-semibold transition-all">
+            🇰🇷 Manhwa
+          </Link>
+          <Link href="/browse?langs=zh" className="px-4 py-1.5 rounded-full bg-card border border-border hover:border-primary text-xs font-semibold transition-all">
+            🇨🇳 Manhua
+          </Link>
+          <Link href="/browse?langs=en" className="px-4 py-1.5 rounded-full bg-card border border-border hover:border-primary text-xs font-semibold transition-all text-primary font-bold">
+            🦸 Western Comics
+          </Link>
+        </div>
+
         <Link href="/browse" className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-bold px-6 py-3 rounded-full transition-colors">
           Browse All Titles →
         </Link>
