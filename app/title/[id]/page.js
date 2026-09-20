@@ -33,6 +33,8 @@ export default async function TitlePage({ params }) {
     }
   }
 
+
+
   const statusColor = {
     ongoing: "text-green-400",
     completed: "text-blue-400",

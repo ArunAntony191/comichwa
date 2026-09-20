@@ -60,7 +60,6 @@ const SORT_OPTIONS = [
 
 const TYPES = [
   { code: "", label: "Any" },
-  { code: "en", label: "Comic (Western / English)" },
   { code: "ja", label: "Manga (Japanese)" },
   { code: "ko", label: "Manhwa (Korean)" },
   { code: "zh", label: "Manhua (Chinese)" }

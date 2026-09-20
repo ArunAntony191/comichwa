@@ -35,6 +35,8 @@ export default async function BrowsePage({ searchParams }) {
     ratings
   );
 
+
+
   const filterKey = `${query}-${sort}-${genres.join(",")}-${langs.join(",")}-${demographics.join(",")}-${statuses.join(",")}-${yearFrom}-${tagMode}-${ratings.join(",")}`;
 
   return (

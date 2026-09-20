@@ -43,13 +43,41 @@ export default async function ReaderPage({ params }) {
         {pages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center py-24 text-center px-4">
             <div className="text-5xl mb-4">😔</div>
-            <h2 className="text-xl font-bold text-white mb-2">Chapter Not Available</h2>
+            <h2 className="text-xl font-bold text-white mb-2">Chapter Images Not Available</h2>
             <p className="text-zinc-400 text-sm max-w-sm mb-6">
-              {error || "This chapter's images could not be loaded."}
+              {error || "This chapter's images could not be loaded from MangaDex."}
             </p>
-            <p className="text-zinc-600 text-xs max-w-xs mb-8">
-              Some chapters are hosted externally (e.g. on Webtoon or Kakao) and cannot be read here. Try a different chapter below.
-            </p>
+
+            {/* Alternative Sites Buttons */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 max-w-md w-full mb-8 space-y-3">
+              <p className="text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                🌐 Read Chapter {chapter.chapter} on Free Alternative Sites:
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {[
+                  { name: "MangaDex", icon: "📚", url: `https://mangadex.org/titles?q=${encodeURIComponent(chapter.mangaTitle)}` },
+                  { name: "ComicK", icon: "🚀", url: `https://comick.io/search?q=${encodeURIComponent(chapter.mangaTitle)}` },
+                  { name: "Bato.to", icon: "🔖", url: `https://bato.to/search?word=${encodeURIComponent(chapter.mangaTitle)}` },
+                  { name: "MangaSee", icon: "👁️", url: `https://mangasee123.com/search/?q=${encodeURIComponent(chapter.mangaTitle)}` },
+                  { name: "Flame Scans", icon: "🔥", url: `https://flamecomics.xyz/?s=${encodeURIComponent(chapter.mangaTitle)}` },
+                  { name: "Asura Scans", icon: "⚡", url: `https://asuracomic.net/series?query=${encodeURIComponent(chapter.mangaTitle)}` },
+                  { name: "MangaKakalot", icon: "🌸", url: `https://ww5.mangakakalot.tv/search/${encodeURIComponent(chapter.mangaTitle.toLowerCase().replace(/[^a-z0-9]+/g, "_"))}` },
+                ].map((site) => (
+                  <a
+                    key={site.name}
+                    href={site.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs font-semibold text-zinc-200 transition-colors"
+                  >
+                    <span>{site.icon}</span>
+                    <span>{site.name}</span>
+                    <span className="text-[10px] opacity-60">↗</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+
             {chapter.externalUrl && (
               <a
                 href={chapter.externalUrl}

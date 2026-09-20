@@ -125,94 +125,117 @@ export default function ChapterList({ chapters = [], source = "mangadex", altern
 
   return (
     <div ref={containerRef} className="space-y-4">
-      {/* Missing / Gap Chapters - Expanded Reading Links Card */}
+      {/* 1. Missing / Gap Chapters Notice Banner (shown if early/gap chapters missing) */}
       {missingInfo && (
-        <div className="bg-zinc-900/80 border border-amber-500/25 rounded-xl overflow-hidden">
-          {/* Banner header */}
-          <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3 flex items-center gap-2.5 text-xs text-amber-300">
-            <span className="text-base shrink-0">⚠️</span>
-            <span>
-              <strong>Notice:</strong>{" "}
-              {missingInfo.type === "early" ? (
-                <>Chapters {missingInfo.from}–{missingInfo.to} are unavailable on MangaDex due to publisher licensing restrictions. Available here from <strong>Ch. {missingInfo.resumeAt}</strong>.</>
-              ) : (
-                <>Chapters {missingInfo.from}–{missingInfo.to} are missing from this release (likely removed due to licensing). The chapter list has a gap here.</>
-              )}
-              {mangaTitle && <span className="text-amber-400/70 ml-1">— You can read the missing chapters for free on these sites:</span>}
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex items-center gap-3 text-xs text-amber-300">
+          <span className="text-lg shrink-0">⚠️</span>
+          <span>
+            <strong>Notice:</strong>{" "}
+            {missingInfo.type === "early" ? (
+              <>Chapters {missingInfo.from}–{missingInfo.to} are unavailable on MangaDex due to licensing. Available here from <strong>Ch. {missingInfo.resumeAt}</strong>.</>
+            ) : (
+              <>Chapters {missingInfo.from}–{missingInfo.to} are missing from this release due to licensing restrictions.</>
+            )}
+            {" "}You can read the missing chapters for free on the alternative sites below.
+          </span>
+        </div>
+      )}
+
+      {/* 2. Alternative Free Reading Sources Bar (Always visible for ALL titles) */}
+      {mangaTitle && (
+        <div className="bg-[#16191e] border border-zinc-800/90 rounded-xl p-3.5 space-y-2 shadow-md">
+          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+            <span className="flex items-center gap-1.5 text-cyan-400">
+              <span>🌐</span>
+              <span>Alternative Free Reading Sites</span>
+            </span>
+            <span className="text-[10px] text-zinc-500 font-normal normal-case hidden sm:inline">
+              If a chapter fails to load, try these alternative sources
             </span>
           </div>
 
-          {/* Reading site links */}
-          {mangaTitle && (
-            <div className="px-4 py-3 flex flex-wrap items-center gap-2">
-              {[
-                {
-                  name: "MangaDex",
-                  icon: "📚",
-                  url: `https://mangadex.org/titles?q=${encodeURIComponent(mangaTitle)}`,
-                  color: "bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border-orange-500/30"
-                },
-                {
-                  name: "Bato.to",
-                  icon: "🔖",
-                  url: `https://bato.to/search?word=${encodeURIComponent(mangaTitle)}`,
-                  color: "bg-green-500/15 hover:bg-green-500/25 text-green-300 border-green-500/30"
-                },
-                {
-                  name: "MangaSee",
-                  icon: "👁️",
-                  url: `https://mangasee123.com/search/?q=${encodeURIComponent(mangaTitle)}`,
-                  color: "bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30"
-                },
-                {
-                  name: "Flame Scans",
-                  icon: "🔥",
-                  url: `https://flamecomics.xyz/?s=${encodeURIComponent(mangaTitle)}`,
-                  color: "bg-red-500/15 hover:bg-red-500/25 text-red-300 border-red-500/30"
-                },
-                {
-                  name: "Asura Scans",
-                  icon: "⚡",
-                  url: `https://asuracomic.net/series?query=${encodeURIComponent(mangaTitle)}`,
-                  color: "bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border-purple-500/30"
-                },
-                {
-                  name: "MangaKakalot",
-                  icon: "🌸",
-                  url: `https://ww5.mangakakalot.tv/search/${encodeURIComponent(mangaTitle.toLowerCase().replace(/[^a-z0-9]+/g, "_"))}`,
-                  color: "bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 border-pink-500/30"
-                },
-              ].map((site) => (
-                <a
-                  key={site.name}
-                  href={site.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${site.color}`}
-                >
-                  <span>{site.icon}</span>
-                  <span>{site.name}</span>
-                  <span className="text-[10px] opacity-60">↗</span>
-                </a>
-              ))}
-              {/* Official links */}
-              {officialLinks && officialLinks.slice(0, 2).map((link, i) => (
-                <a
-                  key={`official-${i}`}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30"
-                >
-                  <span>🏆</span>
-                  <span>{link.name}</span>
-                  <span className="text-[10px] opacity-60">↗</span>
-                </a>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              {
+                name: "MangaDex",
+                icon: "📚",
+                url: `https://mangadex.org/titles?q=${encodeURIComponent(mangaTitle)}`,
+                color: "bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 border-orange-500/30"
+              },
+              {
+                name: "ComicK",
+                icon: "🚀",
+                url: `https://comick.io/search?q=${encodeURIComponent(mangaTitle)}`,
+                color: "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
+              },
+              {
+                name: "Bato.to",
+                icon: "🔖",
+                url: `https://bato.to/search?word=${encodeURIComponent(mangaTitle)}`,
+                color: "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+              },
+              {
+                name: "MangaSee",
+                icon: "👁️",
+                url: `https://mangasee123.com/search/?q=${encodeURIComponent(mangaTitle)}`,
+                color: "bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border-blue-500/30"
+              },
+              {
+                name: "Flame Scans",
+                icon: "🔥",
+                url: `https://flamecomics.xyz/?s=${encodeURIComponent(mangaTitle)}`,
+                color: "bg-red-500/10 hover:bg-red-500/20 text-red-300 border-red-500/30"
+              },
+              {
+                name: "Asura Scans",
+                icon: "⚡",
+                url: `https://asuracomic.net/series?query=${encodeURIComponent(mangaTitle)}`,
+                color: "bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border-purple-500/30"
+              },
+              {
+                name: "MangaKakalot",
+                icon: "🌸",
+                url: `https://ww5.mangakakalot.tv/search/${encodeURIComponent(mangaTitle.toLowerCase().replace(/[^a-z0-9]+/g, "_"))}`,
+                color: "bg-pink-500/10 hover:bg-pink-500/20 text-pink-300 border-pink-500/30"
+              },
+              {
+                name: "Webtoon",
+                icon: "🎨",
+                url: `https://www.webtoons.com/en/search?keyword=${encodeURIComponent(mangaTitle)}`,
+                color: "bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border-teal-500/30"
+              },
+            ].map((site) => (
+              <a
+                key={site.name}
+                href={site.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all shadow-sm ${site.color}`}
+              >
+                <span>{site.icon}</span>
+                <span>{site.name}</span>
+                <span className="text-[10px] opacity-60">↗</span>
+              </a>
+            ))}
+
+            {/* Official publisher links if available */}
+            {officialLinks && officialLinks.map((link, i) => (
+              <a
+                key={`official-${i}`}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30 shadow-sm"
+              >
+                <span>🏆</span>
+                <span>{link.name}</span>
+                <span className="text-[10px] opacity-60">↗</span>
+              </a>
+            ))}
+          </div>
         </div>
       )}
+
 
       {/* Chapter List Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3.5 rounded-xl border border-border">
