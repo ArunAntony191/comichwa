@@ -107,8 +107,14 @@ export default function BrowseFilters({
   const [allowNsfw, setAllowNsfw] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(true);
   const [genresOpen, setGenresOpen] = useState(false);
+  const [yearOpen, setYearOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState("");
   const dropdownRef = useRef(null);
+  const yearDropdownRef = useRef(null);
+
+  // Generate year list from current year down to 1950
+  const currentYear = new Date().getFullYear();
+  const YEAR_OPTIONS = Array.from({ length: currentYear - 1949 }, (_, i) => String(currentYear - i));
 
   // Sync settings state from localStorage & event listener
   useEffect(() => {
@@ -126,6 +132,9 @@ export default function BrowseFilters({
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setGenresOpen(false);
+      }
+      if (yearDropdownRef.current && !yearDropdownRef.current.contains(event.target)) {
+        setYearOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -520,19 +529,76 @@ export default function BrowseFilters({
 
           {/* Second Filter Row */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-zinc-800/60">
-            {/* Release Year */}
-            <div className="flex items-center gap-2">
+            {/* Release Year — combobox (type or scroll) */}
+            <div className="flex items-center gap-2" ref={yearDropdownRef}>
               <label className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase whitespace-nowrap">Release Year</label>
-              <input
-                type="number"
-                placeholder="From"
-                value={yearFrom}
-                onChange={(e) => {
-                  setYearFrom(e.target.value);
-                  updateUrl({ yearFrom: e.target.value });
-                }}
-                className="w-20 bg-[#111315] border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500"
-              />
+              <div className="relative">
+                <div className={`flex items-center bg-[#111315] border rounded-lg overflow-hidden transition-colors ${
+                  yearFrom ? "border-cyan-500" : "border-zinc-800"
+                }`}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="Year"
+                    value={yearFrom}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                      setYearFrom(val);
+                      if (val.length === 4) updateUrl({ yearFrom: val });
+                      else if (val === "") updateUrl({ yearFrom: "" });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { updateUrl({ yearFrom }); setYearOpen(false); }
+                      if (e.key === "Escape") setYearOpen(false);
+                    }}
+                    className="w-16 bg-transparent px-2.5 py-1.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none"
+                  />
+                  {yearFrom && (
+                    <button
+                      type="button"
+                      onClick={() => { setYearFrom(""); updateUrl({ yearFrom: "" }); setYearOpen(false); }}
+                      className="px-1 text-zinc-500 hover:text-zinc-300 text-xs leading-none"
+                    >✕</button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setYearOpen((o) => !o)}
+                    className="px-2 py-1.5 border-l border-zinc-800 text-zinc-400 hover:text-cyan-400 hover:bg-zinc-800/60 transition-colors"
+                    aria-label="Open year picker"
+                  >
+                    <svg className={`w-3 h-3 transition-transform ${yearOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Year scroll list */}
+                {yearOpen && (
+                  <div className="absolute left-0 top-full mt-1 w-28 bg-[#141618] border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden">
+                    <div className="max-h-52 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent py-1">
+                      {YEAR_OPTIONS.map((yr) => (
+                        <button
+                          key={yr}
+                          type="button"
+                          onClick={() => {
+                            setYearFrom(yr);
+                            updateUrl({ yearFrom: yr });
+                            setYearOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${
+                            yearFrom === yr
+                              ? "bg-cyan-500/20 text-cyan-400 font-bold"
+                              : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                          }`}
+                        >
+                          {yr}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Action Buttons: Reset & I'm Feeling Lucky */}
